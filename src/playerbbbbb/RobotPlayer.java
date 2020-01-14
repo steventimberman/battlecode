@@ -68,9 +68,20 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
+
         for (Direction dir : directions)
             helper.tryBuild(RobotType.MINER, dir);
+
+
+            //Logic for building less miners later
+            // //HQ will only build miners 10% of possible turns to save soup
+            // double randBuildNumber = Math.random();
+            // if (randBuildNumber > 0.1){
+            //     tryBuild(RobotType.MINER, dir);
+            // }
+
     }
+
 
     static void runMiner() throws GameActionException {
         MinerRobot miner = new MinerRobot(helper);
