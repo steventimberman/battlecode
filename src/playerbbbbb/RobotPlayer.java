@@ -1,6 +1,7 @@
 package playerbbbbb;
 import battlecode.common.*;
 
+
 public strictfp class RobotPlayer {
     static RobotController rc;
 
@@ -17,6 +18,7 @@ public strictfp class RobotPlayer {
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
+    static Helpers helper;
     static int turnCount;
 
     static MapLocation HQMapLoc;
@@ -31,6 +33,7 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
+        RobotPlayer.helper = new Helpers(rc, directions, spawnedByMiner);
 
         turnCount = 0;
 
@@ -66,26 +69,13 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+            helper.tryBuild(RobotType.MINER, dir);
     }
 
     static void runMiner() throws GameActionException {
-        tryBlockchain();
-        RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
-        for (RobotInfo robot : nearbyRobots)
-            if (robot.type == RobotType.HQ)
-                HQMapLoc = robot.location;
-        // tryBuild(randomSpawnedByMiner(), randomDirection());
+        MinerRobot miner = new MinerRobot(helper);
+        miner.runMiner(turnCount);
 
-        for (Direction dir : directions)
-            if (tryMine(dir))
-                System.out.println("I mined!");
-        // for (Direction dir : directions)
-        //     tryBuild(randomSpawnedByMiner(), dir);
-        for (Direction dir : directions)
-            if (tryRefine(dir))
-                System.out.println("I refined soup! " + rc.getTeamSoup());
-        tryMove(randomDirection());
     }
 
     static void runRefinery() throws GameActionException {
@@ -102,7 +92,7 @@ public strictfp class RobotPlayer {
 
     static void runFulfillmentCenter() throws GameActionException {
         for (Direction dir : directions)
-            tryBuild(RobotType.DELIVERY_DRONE, dir);
+            helper.tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
     static void runLandscaper() throws GameActionException {
@@ -122,21 +112,12 @@ public strictfp class RobotPlayer {
             }
         } else {
             // No close robots, so search for robots within sight radius
-            tryMove(randomDirection());
+            helper.tryMove(helper.randomDirection());
         }
     }
 
     static void runNetGun() throws GameActionException {
 
-    }
-
-    /**
-     * Returns a random Direction.
-     *
-     * @return a random Direction
-     */
-    static Direction randomDirection() {
-        return directions[(int) (Math.random() * directions.length)];
     }
 
     /**
@@ -148,90 +129,4 @@ public strictfp class RobotPlayer {
         return spawnedByMiner[(int) (Math.random() * spawnedByMiner.length)];
     }
 
-    static boolean tryMove() throws GameActionException {
-        for (Direction dir : directions)
-            if (tryMove(dir))
-                return true;
-        return false;
-        // MapLocation loc = rc.getLocation();
-        // if (loc.x < 10 && loc.x < loc.y)
-        //     return tryMove(Direction.EAST);
-        // else if (loc.x < 10)
-        //     return tryMove(Direction.SOUTH);
-        // else if (loc.x > loc.y)
-        //     return tryMove(Direction.WEST);
-        // else
-        //     return tryMove(Direction.NORTH);
-    }
-
-    /**
-     * Attempts to move in a given direction.
-     *
-     * @param dir The intended direction of movement
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMove(Direction dir) throws GameActionException {
-        // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if (rc.isReady() && rc.canMove(dir)) {
-            rc.move(dir);
-            return true;
-        } else return false;
-    }
-
-    /**
-     * Attempts to build a given robot in a given direction.
-     *
-     * @param type The type of the robot to build
-     * @param dir The intended direction of movement
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canBuildRobot(type, dir)) {
-            rc.buildRobot(type, dir);
-            return true;
-        } else return false;
-    }
-
-    /**
-     * Attempts to mine soup in a given direction.
-     *
-     * @param dir The intended direction of mining
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMine(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canMineSoup(dir)) {
-            rc.mineSoup(dir);
-            return true;
-        } else return false;
-    }
-
-    /**
-     * Attempts to refine soup in a given direction.
-     *
-     * @param dir The intended direction of refining
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryRefine(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canDepositSoup(dir)) {
-            rc.depositSoup(dir, rc.getSoupCarrying());
-            return true;
-        } else return false;
-    }
-
-
-    static void tryBlockchain() throws GameActionException {
-        if (turnCount < 3) {
-            int[] message = new int[7];
-            for (int i = 0; i < 7; i++) {
-                message[i] = 123;
-            }
-            if (rc.canSubmitTransaction(message, 10))
-                rc.submitTransaction(message, 10);
-        }
-        // System.out.println(rc.getRoundMessages(turnCount-1));
-    }
 }
