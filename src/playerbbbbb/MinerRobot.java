@@ -31,7 +31,6 @@ public class MinerRobot {
             System.out.println("I refined soup! " + rc.getTeamSoup());
     }
 
-
     if (rc.getSoupCarrying()==RobotType.MINER.soupLimit) {
         if (HQMapLoc != null)
             goToHQ();

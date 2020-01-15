@@ -23,6 +23,9 @@ public strictfp class RobotPlayer {
 
     static MapLocation HQMapLoc;
 
+    static HQRobot hq;
+    static MinerRobot miner;
+
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
@@ -36,6 +39,10 @@ public strictfp class RobotPlayer {
         RobotPlayer.helper = new Helpers(rc, directions, spawnedByMiner);
 
         turnCount = 0;
+        switch (rc.getType()) {
+                    case HQ:                 hq = new HQRobot(helper);                break;
+                    case MINER:              miner = new MinerRobot(helper);             break;
+        }
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -68,9 +75,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-
-        for (Direction dir : directions)
-            helper.tryBuild(RobotType.MINER, dir);
+        hq.runHQ(turnCount);
 
 
             //Logic for building less miners later
@@ -84,7 +89,6 @@ public strictfp class RobotPlayer {
 
 
     static void runMiner() throws GameActionException {
-        MinerRobot miner = new MinerRobot(helper);
         miner.runMiner(turnCount);
 
     }
