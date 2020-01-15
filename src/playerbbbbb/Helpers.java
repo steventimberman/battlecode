@@ -28,15 +28,6 @@ public class Helpers {
             if (tryMove(dir))
                 return true;
         return false;
-        // MapLocation loc = rc.getLocation();
-        // if (loc.x < 10 && loc.x < loc.y)
-        //     return tryMove(Direction.EAST);
-        // else if (loc.x < 10)
-        //     return tryMove(Direction.SOUTH);
-        // else if (loc.x > loc.y)
-        //     return tryMove(Direction.WEST);
-        // else
-        //     return tryMove(Direction.NORTH);
     }
 
     /**
@@ -48,7 +39,9 @@ public class Helpers {
      */
     public boolean tryMove(Direction dir) throws GameActionException {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if (rc.isReady() && rc.canMove(dir)) {
+        MapLocation nextToMe = rc.adjacentLocation(dir);
+        boolean isFlooded = rc.senseFlooding(nextToMe);
+        if (rc.canMove(dir) && !isFlooded) {
             rc.move(dir);
             return true;
         } else return false;
@@ -63,7 +56,6 @@ public class Helpers {
      * @throws GameActionException
      */
     public boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
-        System.out.println("IN HEREEEEE");
         if (rc.isReady() && rc.canBuildRobot(type, dir)) {
             rc.buildRobot(type, dir);
             return true;
@@ -78,7 +70,6 @@ public class Helpers {
      * @throws GameActionException
      */
     public boolean tryMine(Direction dir) throws GameActionException {
-        System.out.println("IN HURRRR");
         if (rc.isReady() && rc.canMineSoup(dir)) {
             rc.mineSoup(dir);
             return true;
