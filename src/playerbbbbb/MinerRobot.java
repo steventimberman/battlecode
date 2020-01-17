@@ -12,24 +12,24 @@ public class MinerRobot {
   static Direction[] directions;
   static RobotType[] spawnedByMiner;
   static MapLocation HQMapLoc;
+  static WalkieTalkie walkie;
+
+  static boolean vaporatorIsMade = false;
 
   public MinerRobot(Helpers help) {
     helper = help;
     rc = helper.rc;
     directions = helper.directions;
     spawnedByMiner = helper.spawnedByMiner;
+    walkie = new WalkieTalkie(helper);
   }
 
   public void runMiner(int turnCount) throws GameActionException {
     helper.tryBlockchain(turnCount);
-    if (HQMapLoc == null){
-        findHQ();
-    } else {
-        MapLocation currentLocation = rc.getLocation();
-        Direction dirToHQ = currentLocation.directionTo(HQMapLoc);
-        if (helper.tryRefine(dirToHQ))
-            System.out.println("I refined soup! " + rc.getTeamSoup());
-    }
+
+    vaporatorProcess(turnCount);
+
+    findHQ();
 
     if (rc.getSoupCarrying()==RobotType.MINER.soupLimit) {
         if (HQMapLoc != null)
@@ -42,16 +42,22 @@ public class MinerRobot {
                 System.out.println("I mined!");
         helper.tryMove(helper.randomDirection());
     }
-
   }
 
   public void findHQ() throws GameActionException {
-    RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
-    for (RobotInfo robot : nearbyRobots)
-        if (robot.type == RobotType.HQ) {
-            HQMapLoc = robot.location;
-            System.out.println("I've found HQ!");
-        }
+    if (HQMapLoc == null){
+        RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
+        for (RobotInfo robot : nearbyRobots)
+            if (robot.type == RobotType.HQ) {
+                HQMapLoc = robot.location;
+                System.out.println("I've found HQ!");
+            }
+    }else{
+        MapLocation currentLocation = rc.getLocation();
+        Direction dirToHQ = currentLocation.directionTo(HQMapLoc);
+        if (helper.tryRefine(dirToHQ))
+            System.out.println("I refined soup! " + rc.getTeamSoup());
+    }
 
   }
 
@@ -65,6 +71,26 @@ public class MinerRobot {
         dirToHQ = currentLocation.directionTo(HQMapLoc);
         break;
     }
+  }
+
+  public void vaporatorProcess(int turnCount) throws GameActionException{
+    if (!vaporatorIsMade && turnCount < 430 && turnCount > 420){
+        boolean makeVaporator = walkie.receiveMakeVaporator();
+        System.out.println("Made it to vapor");
+        if (makeVaporator)
+            if (tryMakeVaporator()){
+                vaporatorIsMade = true;
+            }
+    }
+  }
+
+  public boolean tryMakeVaporator() throws GameActionException{
+    for (Direction dir : directions)
+        if (helper.tryBuild(RobotType.VAPORATOR, dir)){
+            System.out.println("MADE VAPORATOR");
+            return true;
+        }
+    return false;
   }
 
 }
