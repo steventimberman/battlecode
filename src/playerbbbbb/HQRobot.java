@@ -1,5 +1,6 @@
 package playerbbbbb;
 import battlecode.common.*;
+import java.util.ArrayList;
 
 /**
 * For static methods that HQ will use.
@@ -13,7 +14,7 @@ public class HQRobot {
     static Direction[] directions;
     static RobotType[] spawnedByMiner;
     static MapLocation HQMapLoc;
-    static int minerRobotID = -1;
+    static ArrayList minerRobotIDs = new ArrayList<Integer>();;
     static WalkieTalkie walkie;
 
 
@@ -23,28 +24,24 @@ public class HQRobot {
         directions = helper.directions;
         spawnedByMiner = helper.spawnedByMiner;
         walkie = new WalkieTalkie(helper);
+
     }
 
     public void runHQ(int turnCount) throws GameActionException {
-        if ((turnCount < 50) && (turnCount > 45) && (minerRobotID == -1))
-            findMiner();
         if (turnCount < 230 || turnCount%50 == 0)
-            for (Direction dir : directions)
-                helper.tryBuild(RobotType.MINER, dir);
+            for (Direction dir : directions){
+                makeNewMiner(dir);
+            }
         if (turnCount < 430 && turnCount > 420)
-            walkie.sendMakeVaporator(minerRobotID);
+            walkie.sendMakeVaporator((int) minerRobotIDs.get(0));
     }
 
-    public void findMiner() throws GameActionException{
-        RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
-        for (RobotInfo robot: nearbyRobots){
-            if (robot.type == RobotType.MINER){
-                minerRobotID = robot.ID;
-                break;
-            }
-
+    public void makeNewMiner(Direction dir) throws GameActionException{
+        if (helper.tryBuild(RobotType.MINER, dir)){
+            MapLocation newRobotLocation = rc.adjacentLocation(dir);
+            RobotInfo newRobot = rc.senseRobotAtLocation(newRobotLocation);
+            minerRobotIDs.add(newRobot.ID);
         }
     }
-
 
 }

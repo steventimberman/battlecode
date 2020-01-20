@@ -65,12 +65,12 @@ public class MinerRobot {
     MapLocation currentLocation = rc.getLocation();
     Direction dirToHQ = currentLocation.directionTo(HQMapLoc);
     System.out.println("GOING BACKKK!!");
-    helper.tryMove(dirToHQ);
     while (helper.tryMove(dirToHQ)) {
         currentLocation = rc.getLocation();
         dirToHQ = currentLocation.directionTo(HQMapLoc);
         break;
     }
+    helper.tryRefine(dirToHQ);
   }
 
   public void vaporatorProcess(int turnCount) throws GameActionException{
