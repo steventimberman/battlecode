@@ -25,6 +25,7 @@ public strictfp class RobotPlayer {
 
     static HQRobot hq;
     static MinerRobot miner;
+    static NetGunRobot netgun;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -42,7 +43,7 @@ public strictfp class RobotPlayer {
         switch (rc.getType()) {
                     case HQ:                 hq = new HQRobot(helper);                break;
                     case MINER:              miner = new MinerRobot(helper);             break;
-                    case NETGUN:             netgun = new NetGunRobot(helper);        break;
+                    case NET_GUN:             netgun = new NetGunRobot(helper);        break;
 
         }
 

@@ -6,6 +6,7 @@ public class NetGunRobot {
   static RobotController rc;
   static Direction[] directions;
   static MapLocation HQMapLoc;
+  static WalkieTalkie walkie;
 
   public NetGunRobot(Helpers help) {
         helper = help;
@@ -23,10 +24,9 @@ public class NetGunRobot {
       //If a delivery drone is found in the list of enemy robots shoot it
         if (robot.type == RobotType.DELIVERY_DRONE){
             enemyID = robot.ID;
-            if rc.canShootUnit(int enemyID){
-             rc.shootUnit(int enemyID);
+            if (rc.canShootUnit(enemyID))
+              rc.shootUnit(enemyID);
         }
-      }
     }
 
   }

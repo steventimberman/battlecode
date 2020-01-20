@@ -14,7 +14,7 @@ public class HQRobot {
     static Direction[] directions;
     static RobotType[] spawnedByMiner;
     static MapLocation HQMapLoc;
-    static ArrayList minerRobotIDs = new ArrayList<Integer>();;
+    static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();;
     static WalkieTalkie walkie;
 
 
@@ -28,12 +28,14 @@ public class HQRobot {
     }
 
     public void runHQ(int turnCount) throws GameActionException {
-        if (turnCount < 230 || turnCount%50 == 0)
+        if (minerRobotIDs.size() < 25)
             for (Direction dir : directions){
                 makeNewMiner(dir);
             }
-        if (turnCount < 430 && turnCount > 420)
-            walkie.sendMakeVaporator((int) minerRobotIDs.get(0));
+        int soupTotal = rc.getTeamSoup();
+        if (soupTotal > 500){
+            walkie.sendMakeVaporator((int) minerRobotIDs.get(1));
+        }
     }
 
     public void makeNewMiner(Direction dir) throws GameActionException{
@@ -41,6 +43,8 @@ public class HQRobot {
             MapLocation newRobotLocation = rc.adjacentLocation(dir);
             RobotInfo newRobot = rc.senseRobotAtLocation(newRobotLocation);
             minerRobotIDs.add(newRobot.ID);
+            System.out.println("ADDED NEW ROBOT");
+            System.out.println(minerRobotIDs);
         }
     }
 
