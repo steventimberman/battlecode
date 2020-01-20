@@ -15,17 +15,18 @@ public class NetGunRobot {
     }
 
   public void tryShooting() throws GameActionException{
-  	boolean enemyFound = false;
-  	int enemyID = 0;
+    int enemyID = 0;
     Team enemy = rc.getTeam().opponent();
+    //-1 uses full vision and enemy makes sure all robots sense are on the other team
     RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1,enemy);
     for (RobotInfo robot: nearbyRobots){
+      //If a delivery drone is found in the list of enemy robots shoot it
         if (robot.type == RobotType.DELIVERY_DRONE){
             enemyID = robot.ID;
             if rc.canShootUnit(int enemyID){
-    			rc.shootUnit(int enemyID);
-    		}
+             rc.shootUnit(int enemyID);
         }
+      }
     }
 
   }
