@@ -14,10 +14,11 @@ public class MinerRobot {
   static MapLocation HQMapLoc;
   static WalkieTalkie walkie;
 
-  static boolean vaporatorIsMade = false;
+  static boolean vaporatorIsMade;
 
   public MinerRobot(Helpers help) {
     helper = help;
+    vaporatorIsMade = false;
     rc = helper.rc;
     directions = helper.directions;
     spawnedByMiner = helper.spawnedByMiner;
@@ -27,7 +28,16 @@ public class MinerRobot {
   public void runMiner(int turnCount) throws GameActionException {
     helper.tryBlockchain(turnCount);
 
-    vaporatorProcess(turnCount);
+    if (!vaporatorIsMade){
+        boolean received = walkie.receiveVaporatorMade();
+        if (received){
+            vaporatorIsMade = true;
+        }
+    }
+
+    if (!vaporatorIsMade){
+        vaporatorProcess();
+    }
 
     findHQ();
 
@@ -73,13 +83,15 @@ public class MinerRobot {
     helper.tryRefine(dirToHQ);
   }
 
-  public void vaporatorProcess(int turnCount) throws GameActionException{
-    if (!vaporatorIsMade && turnCount < 430 && turnCount > 420){
+  public void vaporatorProcess() throws GameActionException{
+    int soupTotal = rc.getTeamSoup();
+    if (soupTotal > 500){
         boolean makeVaporator = walkie.receiveMakeVaporator();
         System.out.println("Made it to vapor");
         if (makeVaporator)
             if (tryMakeVaporator()){
                 vaporatorIsMade = true;
+                walkie.sendVaporatorMade();
             }
     }
   }
