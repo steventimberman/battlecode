@@ -26,23 +26,52 @@ public class LandscaperRobot {
   public void runLandscaper(int turnCount) throws GameActionException {
     helper.tryBlockchain(turnCount);
 
-  //   if (HQMapLoc != null){
+    if (HQMapLoc != null){
 
-  //   } else {
-  //     findHQ();
-  //   }
-  // }
+      } else {
+        findHQ();
+      }
+    }
 
-  // public void findHQ(){
-  //   int i = 1;
-  // }
+    public void findHQ(){
+      int i = 1;
+    }
 
-  // public void getToHQ(){
+    public void getToHQ(){
+      int i = 1;
+    }
 
-  // }
+    public void depositAroundHQ(){
+      MapLocation currentLocation = rc.getLocation();
+      Direction dirToHQ = currentLocation.directionTo(HQMapLoc);
+      switch(dirToHQ){
+        case NORTH: {
+          break;
+        }
+        case NORTHWEST: {
+          break;
+        }
+        case WEST: {
+          break;
+        }
+        case SOUTHWEST: {
+          break;
+        }
+        case SOUTH: {
+          break;
+        }
+        case SOUTHEAST: {
+          break;
+        }
+        case EAST: {
+          break;
+        }
+        case NORTHEAST: {
+          break;
+        }
+      }
 
-  // public void digAroundHQ(){
+    }
 
-  }
 
 }
