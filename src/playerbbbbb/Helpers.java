@@ -90,6 +90,13 @@ public class Helpers {
         } else return false;
     }
 
+    public boolean tryDepositDirt(Direction dir) throws GameActionException {
+      if (rc.isReady() && rc.canDepositDirt(dir)){
+        rc.depositDirt(dir);
+        return true;
+      } return false;
+    }
+
 
     public void tryBlockchain(int turnCount) throws GameActionException {
         if (turnCount < 3) {
