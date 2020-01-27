@@ -1,5 +1,6 @@
 package playerbbbbb;
 import battlecode.common.*;
+import java.util.ArrayList;
 
 /**
 * For static methods that miners will use.
@@ -13,31 +14,23 @@ public class MinerRobot {
   static RobotType[] spawnedByMiner;
   static MapLocation HQMapLoc;
   static WalkieTalkie walkie;
+  static ArrayList<Integer> toDo;
 
   static boolean vaporatorIsMade;
 
-  public MinerRobot(Helpers help) {
+  public MinerRobot(Helpers help) throws GameActionException {
     helper = help;
     vaporatorIsMade = false;
     rc = helper.rc;
     directions = helper.directions;
     spawnedByMiner = helper.spawnedByMiner;
     walkie = new WalkieTalkie(helper);
+    toDo = new ArrayList<Integer>();
   }
 
   public void runMiner(int turnCount) throws GameActionException {
-    helper.tryBlockchain(turnCount);
 
-    if (!vaporatorIsMade){
-        boolean received = walkie.receiveVaporatorMade();
-        if (received){
-            vaporatorIsMade = true;
-        }
-    }
-
-    if (!vaporatorIsMade){
-        vaporatorProcess();
-    }
+    searchForTasks();
 
     findHQ();
 
@@ -52,6 +45,37 @@ public class MinerRobot {
                 System.out.println("I mined!");
         helper.tryMove(helper.randomDirection());
     }
+  }
+
+  public void searchForTasks() throws GameActionException {
+    // Read new messages for tasks. If it isnt completed, move task to toDo.
+    ArrayList<Integer> newMessages = walkie.readBlockchain();
+    for (int i=0; i < newMessages.size(); i++){
+        int taskType = newMessages.get(i);
+        doTask(true, taskType);
+    }
+
+    // Search toDo for tasks. If it is completed, remove.
+    for (int i=0; i < toDo.size(); i++){
+        int taskType = toDo.get(i);
+        if (doTask(false, taskType)){
+            toDo.remove(i);
+            i--;
+        }
+    }
+
+  }
+
+  public boolean doTask(boolean newTask, int taskType) throws GameActionException {
+    boolean success = false;
+    if (taskType == 0){
+        success = tryMakeVaporator();
+    }
+
+    if (!success && newTask)
+        toDo.add(taskType);
+
+    return success;
   }
 
   public void findHQ() throws GameActionException {
@@ -81,19 +105,6 @@ public class MinerRobot {
         break;
     }
     helper.tryRefine(dirToHQ);
-  }
-
-  public void vaporatorProcess() throws GameActionException{
-    int soupTotal = rc.getTeamSoup();
-    if (soupTotal > 500){
-        boolean makeVaporator = walkie.receiveMakeVaporator();
-        System.out.println("Made it to vapor");
-        if (makeVaporator)
-            if (tryMakeVaporator()){
-                vaporatorIsMade = true;
-                walkie.sendVaporatorMade();
-            }
-    }
   }
 
   public boolean tryMakeVaporator() throws GameActionException{
