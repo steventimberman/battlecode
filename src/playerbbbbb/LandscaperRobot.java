@@ -15,7 +15,7 @@ public class LandscaperRobot {
   static WalkieTalkie walkie;
 
 
-  public LandscaperRobot(Helpers help) {
+  public LandscaperRobot(Helpers help) throws GameActionException {
     helper = help;
     rc = helper.rc;
     directions = helper.directions;

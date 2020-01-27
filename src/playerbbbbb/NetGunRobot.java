@@ -8,7 +8,7 @@ public class NetGunRobot {
   static MapLocation HQMapLoc;
   static WalkieTalkie walkie;
 
-  public NetGunRobot(Helpers help) {
+  public NetGunRobot(Helpers help) throws GameActionException {
         helper = help;
         rc = helper.rc;
         directions = helper.directions;

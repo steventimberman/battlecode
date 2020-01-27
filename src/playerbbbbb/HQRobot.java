@@ -14,16 +14,18 @@ public class HQRobot {
     static Direction[] directions;
     static RobotType[] spawnedByMiner;
     static MapLocation HQMapLoc;
-    static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();;
+    static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
+    static boolean vaporatorMessageSent;
 
 
-    public HQRobot(Helpers help) {
+    public HQRobot(Helpers help) throws GameActionException {
         helper = help;
         rc = helper.rc;
         directions = helper.directions;
         spawnedByMiner = helper.spawnedByMiner;
         walkie = new WalkieTalkie(helper);
+        vaporatorMessageSent = false;
 
     }
 
@@ -33,12 +35,12 @@ public class HQRobot {
                 makeNewMiner(dir);
             }
         int soupTotal = rc.getTeamSoup();
-        if (soupTotal > 500){
-            walkie.sendMakeVaporator((int) minerRobotIDs.get(1));
+        if (soupTotal > 500 && !vaporatorMessageSent && tryMakeVaporator(3)){
+            vaporatorMessageSent = true;
         }
     }
 
-    public void makeNewMiner(Direction dir) throws GameActionException{
+    public void makeNewMiner(Direction dir) throws GameActionException {
         if (helper.tryBuild(RobotType.MINER, dir)){
             MapLocation newRobotLocation = rc.adjacentLocation(dir);
             RobotInfo newRobot = rc.senseRobotAtLocation(newRobotLocation);
@@ -46,6 +48,14 @@ public class HQRobot {
             System.out.println("ADDED NEW ROBOT");
             System.out.println(minerRobotIDs);
         }
+    }
+
+    public boolean tryMakeVaporator (int cost) throws GameActionException {
+        int minerToSendTo = (int) minerRobotIDs.get(1);
+        int[] message = walkie.makeMessage(0, minerToSendTo, -1);
+        boolean sent = walkie.trySendMessage(message, cost);
+        return sent;
+
     }
 
 }
