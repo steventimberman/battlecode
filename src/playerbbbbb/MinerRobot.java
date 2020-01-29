@@ -84,6 +84,8 @@ public class MinerRobot {
     } else if (taskType == 3) {
         refineryLocation = senderLoc;
         success = true;
+    } else if (taskType == 4) {
+        success = tryMakeBuilding(RobotType.DESIGN_SCHOOL);
     }
 
     if (!success && newTask){
