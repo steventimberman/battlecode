@@ -26,6 +26,8 @@ public strictfp class RobotPlayer {
     static HQRobot hq;
     static MinerRobot miner;
     static NetGunRobot netgun;
+    static VaporatorRobot vapor;
+    static RefineryRobot refine;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -41,9 +43,24 @@ public strictfp class RobotPlayer {
 
         turnCount = 0;
         switch (rc.getType()) {
-                    case HQ:                 hq = new HQRobot(helper);                break;
-                    case MINER:              miner = new MinerRobot(helper);             break;
-                    case NET_GUN:             netgun = new NetGunRobot(helper);        break;
+            case HQ:{
+                hq = new HQRobot(helper);
+            } break;
+            case MINER:{
+                miner = new MinerRobot(helper);
+                miner.findHQInit();
+            } break;
+            case NET_GUN:{
+                netgun = new NetGunRobot(helper);
+            } break;
+            case VAPORATOR:{
+                vapor = new VaporatorRobot(helper);
+                vapor.sayHello();
+            }
+            case REFINERY:{
+                refine = new RefineryRobot(helper);
+                refine.sayHello();
+            } break;
 
         }
 
@@ -78,7 +95,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        hq.runHQ(turnCount);
+        hq.runHQ();
 
 
             //Logic for building less miners later
@@ -92,7 +109,7 @@ public strictfp class RobotPlayer {
 
 
     static void runMiner() throws GameActionException {
-        miner.runMiner(turnCount);
+        miner.runMiner();
 
     }
 
