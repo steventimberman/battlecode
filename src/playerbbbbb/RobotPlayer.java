@@ -28,6 +28,7 @@ public strictfp class RobotPlayer {
     static NetGunRobot netgun;
     static VaporatorRobot vapor;
     static RefineryRobot refine;
+    static DesignSchoolRobot design;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -55,11 +56,15 @@ public strictfp class RobotPlayer {
             } break;
             case VAPORATOR:{
                 vapor = new VaporatorRobot(helper);
-                vapor.sayHello();
-            }
+                vapor.sayHelloVaporator();
+            } break;
             case REFINERY:{
                 refine = new RefineryRobot(helper);
-                refine.sayHello();
+                refine.sayHelloRefinery();
+            } break;
+            case DESIGN_SCHOOL:{
+                design = new DesignSchoolRobot(helper);
+                design.sayHelloDesignSchool();
             } break;
 
         }

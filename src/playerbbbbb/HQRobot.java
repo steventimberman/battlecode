@@ -16,7 +16,7 @@ public class HQRobot {
     static MapLocation HQMapLoc;
     static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
-    static boolean sendVaporatorMessage, sendRefineryMessage, sendDesignSchoolMessage;
+    static boolean sendVaporatorMessage, sendRefineryMessage, sendDesignSchoolMessage, makeLandscaperNext;
 
 
     public HQRobot(Helpers help) throws GameActionException {
@@ -26,7 +26,9 @@ public class HQRobot {
         spawnedByMiner = helper.spawnedByMiner;
         walkie = new WalkieTalkie(helper);
         sendVaporatorMessage = true;
-        sendRefineryMessage = sendDesignSchoolMessage = false;
+        sendRefineryMessage = false;
+        sendDesignSchoolMessage = false;
+        makeLandscaperNext = false;
 
     }
 
@@ -42,9 +44,13 @@ public class HQRobot {
             sendVaporatorMessage = false;
         }
 
-        if (sendRefineryMessage && soupTotal > 225 && tryMakeBuilding(10, RobotType.REFINERY)){
+        else if (sendRefineryMessage && soupTotal > 225 && tryMakeBuilding(5, RobotType.REFINERY)){
             System.out.println("MAKE A REFINE! AHHH");
             sendRefineryMessage = false;
+        }
+        else if (sendDesignSchoolMessage && soupTotal > 175 && tryMakeBuilding(5, RobotType.DESIGN_SCHOOL)){
+            System.out.println("MAKE A DESIGN SCHOOL! AHHH");
+            sendDesignSchoolMessage = false;
         }
     }
 
@@ -53,10 +59,15 @@ public class HQRobot {
         ArrayList<ArrayList<Integer>> newMessages = walkie.readBlockchain();
         for (int i=0; i < newMessages.size(); i++){
             int infoType = newMessages.get(i).get(0);
-            if (infoType == 1)
+            if (infoType == 1){
                 sendRefineryMessage = true;
-            else if (infoType == 3)
+            }
+            else if (infoType == 3){
                 sendDesignSchoolMessage = true;
+            }
+            else if (infoType == 5){
+                makeLandscaperNext = true;
+            }
         }
     }
 
@@ -75,6 +86,7 @@ public class HQRobot {
         switch (buildingType){
             case VAPORATOR: messageType = 0;   break;
             case REFINERY: messageType = 2;   break;
+            case DESIGN_SCHOOL: messageType = 4;   break;
             default: messageType = -1;
 
         }

@@ -3,10 +3,10 @@ import battlecode.common.*;
 import java.util.ArrayList;
 
 /**
-* For static methods that a Vaporator building will use.
+* For static methods that a DesignSchool building will use.
 **/
 
-public class VaporatorRobot {
+public class DesignSchoolRobot {
 
     static Helpers helper;
     static RobotController rc;
@@ -15,22 +15,22 @@ public class VaporatorRobot {
     static MapLocation HQMapLoc;
     static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
+    static boolean designSchoolMessageSent;
 
 
-
-    public VaporatorRobot(Helpers help) throws GameActionException {
+    public DesignSchoolRobot(Helpers help) throws GameActionException {
         helper = help;
         rc = helper.rc;
         directions = helper.directions;
         walkie = new WalkieTalkie(helper);
     }
 
-    public void runVaporator() throws GameActionException {
+    public void runDesignSchool() throws GameActionException {
 
     }
 
-    public boolean sayHelloVaporator() throws GameActionException {
-        int[] message = walkie.makeMessage(1, -1, 1, -1);
+    public boolean sayHelloDesignSchool() throws GameActionException {
+        int[] message = walkie.makeMessage(5, -1, 1, -1);
         boolean sent = walkie.trySendMessage(message, 10);
         return sent;
     }

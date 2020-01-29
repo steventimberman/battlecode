@@ -15,7 +15,6 @@ public class RefineryRobot {
     static MapLocation HQMapLoc;
     static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
-    static boolean vaporatorMessageSent;
 
 
     public RefineryRobot(Helpers help) throws GameActionException {
@@ -29,7 +28,7 @@ public class RefineryRobot {
 
     }
 
-    public boolean sayHello() throws GameActionException {
+    public boolean sayHelloRefinery() throws GameActionException {
         int[] message = walkie.makeMessage(3, -1, 0, 1);
         boolean sent = walkie.trySendMessage(message, 10);
         return sent;

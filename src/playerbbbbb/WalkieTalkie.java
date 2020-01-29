@@ -16,7 +16,9 @@ public class WalkieTalkie {
     "Make Vaporator",
     "Vaporator Was Made",
     "Make Refinery",
-    "Refinery was made"
+    "Refinery was made",
+    "Make Design School",
+    "Design School was made"
   };
 
   static final RobotType[] robotTypes = {
