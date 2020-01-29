@@ -16,7 +16,7 @@ public class HQRobot {
     static MapLocation HQMapLoc;
     static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
-    static boolean vaporatorMessageSent;
+    static boolean sendVaporatorMessage, sendRefineryMessage, sendDesignSchoolMessage;
 
 
     public HQRobot(Helpers help) throws GameActionException {
@@ -25,18 +25,38 @@ public class HQRobot {
         directions = helper.directions;
         spawnedByMiner = helper.spawnedByMiner;
         walkie = new WalkieTalkie(helper);
-        vaporatorMessageSent = false;
+        sendVaporatorMessage = true;
+        sendRefineryMessage = sendDesignSchoolMessage = false;
 
     }
 
-    public void runHQ(int turnCount) throws GameActionException {
+    public void runHQ() throws GameActionException {
+        searchForInfo();
         if (minerRobotIDs.size() < 25)
             for (Direction dir : directions){
                 makeNewMiner(dir);
             }
         int soupTotal = rc.getTeamSoup();
-        if (soupTotal > 500 && !vaporatorMessageSent && tryMakeVaporator(3)){
-            vaporatorMessageSent = true;
+        if (sendVaporatorMessage && soupTotal > 520 && tryMakeBuilding(5, RobotType.VAPORATOR)){
+            System.out.println("MAKE A VAPORATOR! AHHH");
+            sendVaporatorMessage = false;
+        }
+
+        if (sendRefineryMessage && soupTotal > 225 && tryMakeBuilding(10, RobotType.REFINERY)){
+            System.out.println("MAKE A REFINE! AHHH");
+            sendRefineryMessage = false;
+        }
+    }
+
+    public void searchForInfo() throws GameActionException {
+        // Read new messages for info.
+        ArrayList<ArrayList<Integer>> newMessages = walkie.readBlockchain();
+        for (int i=0; i < newMessages.size(); i++){
+            int infoType = newMessages.get(i).get(0);
+            if (infoType == 1)
+                sendRefineryMessage = true;
+            else if (infoType == 3)
+                sendDesignSchoolMessage = true;
         }
     }
 
@@ -50,12 +70,18 @@ public class HQRobot {
         }
     }
 
-    public boolean tryMakeVaporator (int cost) throws GameActionException {
+    public boolean tryMakeBuilding (int cost, RobotType buildingType) throws GameActionException {
+        int messageType;
+        switch (buildingType){
+            case VAPORATOR: messageType = 0;   break;
+            case REFINERY: messageType = 2;   break;
+            default: messageType = -1;
+
+        }
+        System.out.println(messageType);
         int minerToSendTo = (int) minerRobotIDs.get(1);
-        int[] message = walkie.makeMessage(0, minerToSendTo, -1);
+        int[] message = walkie.makeMessage(messageType, minerToSendTo, -1, -1);
         boolean sent = walkie.trySendMessage(message, cost);
         return sent;
-
     }
-
 }
