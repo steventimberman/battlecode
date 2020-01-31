@@ -19,7 +19,8 @@ public class LandscaperRobot {
   static ArrayList<MapLocation> fourSides;
   static ArrayList<MapLocation> smallSquare;
   static int nextTile;
-  static boolean justDug;
+  static boolean justDug, alert1, alert2, alert2sender;
+  static boolean startDigging;
 
   public LandscaperRobot(Helpers help) throws GameActionException {
     helper = help;
@@ -33,13 +34,51 @@ public class LandscaperRobot {
     currentLocation = rc.getLocation();
     dirToHQ = Direction.NORTH;
     justDug = false;
+    alert1 = alert2 = alert2sender = false;
+
   }
 
   public void runLandscaper() throws GameActionException {
-    updateSquarePosition();
+    if (alert2==false){
+      lookForAlerts();
+      getToHQSquare();
+    }
 
-    returnDirt();
+    if (alert2){
+      updateSquarePosition();
 
+      returnDirt();
+    }
+
+  }
+
+  public void lookForAlerts() throws GameActionException{
+    ArrayList<ArrayList<Integer>> newMessages = walkie.readBlockchain();
+    for (int i=0; i < newMessages.size(); i++){
+        System.out.println("LOOKINGG");
+        ArrayList<Integer> message = newMessages.get(i);
+        int task = message.get(0);
+        System.out.println(message);
+        if (alert1==false && task==8){
+          System.out.println("I got my task!");
+          nextTile = 0;
+          alert1=true;
+        }
+        else if (alert1==false && task == 9){
+          alert1 = true;
+          nextTile = 3;
+          System.out.println("I got my task!");
+        }else if (alert1==false && task == 10){
+          nextTile = 6;
+          alert1=true;
+          System.out.println("I got my task!");
+          alert2sender = true;
+        }else if (alert1==true && task == 11){
+          System.out.println("I got my second task!");
+          alert2 = true;
+        }
+
+    }
   }
 
   public void returnDirt() throws GameActionException {
@@ -60,14 +99,22 @@ public class LandscaperRobot {
     if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocationSquare())==false)) {
       helper.tryMove(helper.randomDirection());
     }
+
     updatePosition();
   }
 
   public void getToHQSquare() throws GameActionException {
-    if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocationSquare())==false)) {
-      helper.tryMove(helper.randomDirection());
+    if (alert2sender && alert2 == false && currentLocation.equals(getNextLocationSquare())){
+      int[] message = walkie.makeMessage(11, -1, 2, -1);
+      walkie.trySendMessage(message, 5);
+      alert2=true;
     }
-    updateSquarePosition();
+    if (alert2==true || currentLocation.equals(getNextLocationSquare())==false ){
+      if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocationSquare())==false)) {
+        helper.tryMove(helper.randomDirection());
+      }
+      updateSquarePosition();
+    }
   }
 
   public void putDirtDown() throws GameActionException {
@@ -201,7 +248,9 @@ public class LandscaperRobot {
             MapLocation whereToDig = currentLocation.subtract(actualDirToHQ);
             if (helper.tryDig(currentLocation.directionTo(whereToDig))){
             //   if (rc.isLocationOccupied(getNextLocationSquare())==false){
-                justDug = (justDug==false);
+                if (rc.getDirtCarrying() >= 6){
+                  justDug = (justDug==false);
+                }
               // }
             }
 
