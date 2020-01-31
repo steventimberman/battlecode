@@ -34,10 +34,17 @@ public class HQRobot {
 
     public void runHQ() throws GameActionException {
         searchForInfo();
-        if (minerRobotIDs.size() < 25)
+        if (minerRobotIDs.size() < 7){
+            if (minerRobotIDs.size() > 3 && minerRobotIDs.size() < 6) {
+                int minerToSendTo = (int) minerRobotIDs.get(1);
+                int[] message = walkie.makeMessage(7, minerToSendTo, -1, -1);
+                walkie.trySendMessage(message, 5);
+
+            }
             for (Direction dir : directions){
                 makeNewMiner(dir);
             }
+        }
         int soupTotal = rc.getTeamSoup();
         if (sendVaporatorMessage && soupTotal > 520 && tryMakeBuilding(5, RobotType.VAPORATOR)){
             System.out.println("MAKE A VAPORATOR! AHHH");

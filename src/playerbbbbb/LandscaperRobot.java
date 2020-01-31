@@ -199,9 +199,10 @@ public class LandscaperRobot {
       else {
             Direction actualDirToHQ = currentLocation.directionTo(hqMapLoc);
             MapLocation whereToDig = currentLocation.subtract(actualDirToHQ);
-            if (helper.tryDig(currentLocation.directionTo(whereToDig)))
-            {
-              justDug = (justDug==false);
+            if (helper.tryDig(currentLocation.directionTo(whereToDig))){
+            //   if (rc.isLocationOccupied(getNextLocationSquare())==false){
+                justDug = (justDug==false);
+              // }
             }
 
       }

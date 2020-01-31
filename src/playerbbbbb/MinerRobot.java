@@ -19,6 +19,7 @@ public class MinerRobot {
   static Direction dirToHQ;
   static Direction dirToRefinery;
   static boolean awayFromHQ;
+  static boolean builder;
 
   static boolean vaporatorIsMade;
 
@@ -34,6 +35,7 @@ public class MinerRobot {
     dirToHQ = Direction.NORTH;
     dirToRefinery = Direction.NORTH;
     awayFromHQ = false;
+    builder = false;
   }
 
   public void runMiner() throws GameActionException {
@@ -96,13 +98,19 @@ public class MinerRobot {
         || ((taskType == 4) && tryMakeBuilding(RobotType.DESIGN_SCHOOL))
         )
     {
-
         success = true;
+
         System.out.print("success: ");
         System.out.println(success);
     }
     else if (taskType == 3) {
         refineryLocation = senderLoc;
+        awayFromHQ = true;
+        success = true;
+        System.out.println("The new Map Location is:");
+        System.out.println(refineryLocation);
+    }
+    else if (taskType == 7) {
         awayFromHQ = true;
         success = true;
         System.out.println("The new Map Location is:");
@@ -151,11 +159,18 @@ public class MinerRobot {
   }
 
   public boolean tryMakeBuilding(RobotType robotTypeToBuild) throws GameActionException{
+    Direction tryThisDir = currentLocation.directionTo(currentLocation.subtract(dirToHQ));
+    if (helper.tryBuild(robotTypeToBuild, tryThisDir)){
+        System.out.println("MADE BUILDING");
+          return true;
+      }
     for (Direction dir : directions){
+      if (dir.equals(dirToHQ)==false){
         if (helper.tryBuild(robotTypeToBuild, dir)){
             System.out.println("MADE BUILDING");
             return true;
         }
+      }
     }
     return false;
   }
