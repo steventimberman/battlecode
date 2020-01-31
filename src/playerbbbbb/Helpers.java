@@ -23,12 +23,17 @@ public class Helpers {
         return directions[(int) (Math.random() * directions.length)];
     }
 
-    public boolean tryMove() throws GameActionException {
-        for (Direction dir : directions)
-            if (tryMove(dir))
-                return true;
-        return false;
+    public Direction randomDirectionExcept(Direction notThisDirection) {
+        Direction nextDirection;
+        while (true){
+            nextDirection = directions[(int) (Math.random() * directions.length)];
+            if (nextDirection.equals(notThisDirection) == false){
+                break;
+            }
+        }
+        return nextDirection;
     }
+
 
     /**
      * Attempts to move in a given direction.
@@ -39,12 +44,15 @@ public class Helpers {
      */
     public boolean tryMove(Direction dir) throws GameActionException {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        MapLocation nextToMe = rc.adjacentLocation(dir);
-        boolean isFlooded = rc.senseFlooding(nextToMe);
-        if (rc.canMove(dir) && !isFlooded) {
-            rc.move(dir);
-            return true;
-        } else return false;
+        if (rc.canMove(dir)) {
+            MapLocation nextToMe = rc.adjacentLocation(dir);
+            boolean isFlooded = rc.senseFlooding(nextToMe);
+            if (isFlooded==false){
+                rc.move(dir);
+                return true;
+            }
+
+        } return false;
     }
 
     /**
@@ -59,7 +67,9 @@ public class Helpers {
         if (rc.isReady() && rc.canBuildRobot(type, dir)) {
             rc.buildRobot(type, dir);
             return true;
-        } else return false;
+        } else{
+            return false;
+        }
     }
 
     /**
@@ -72,6 +82,13 @@ public class Helpers {
     public boolean tryMine(Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canMineSoup(dir)) {
             rc.mineSoup(dir);
+            return true;
+        } else return false;
+    }
+
+    public boolean tryDig(Direction dir) throws GameActionException {
+        if (rc.isReady() && rc.canDigDirt(dir)) {
+            rc.digDirt(dir);
             return true;
         } else return false;
     }

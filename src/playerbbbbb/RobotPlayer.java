@@ -29,6 +29,7 @@ public strictfp class RobotPlayer {
     static VaporatorRobot vapor;
     static RefineryRobot refine;
     static DesignSchoolRobot design;
+    static LandscaperRobot landscape;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -46,6 +47,7 @@ public strictfp class RobotPlayer {
         switch (rc.getType()) {
             case HQ:{
                 hq = new HQRobot(helper);
+                hq.shareLocation();
             } break;
             case MINER:{
                 miner = new MinerRobot(helper);
@@ -65,6 +67,10 @@ public strictfp class RobotPlayer {
             case DESIGN_SCHOOL:{
                 design = new DesignSchoolRobot(helper);
                 design.sayHelloDesignSchool();
+            } break;
+            case LANDSCAPER:{
+                landscape = new LandscaperRobot(helper);
+                landscape.findHQLocation();
             } break;
 
         }
@@ -127,7 +133,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-
+        design.runDesignSchool();
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -136,7 +142,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-
+        landscape.runLandscaper();
     }
 
     static void runDeliveryDrone() throws GameActionException {

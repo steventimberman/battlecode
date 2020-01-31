@@ -43,7 +43,6 @@ public class HQRobot {
             System.out.println("MAKE A VAPORATOR! AHHH");
             sendVaporatorMessage = false;
         }
-
         else if (sendRefineryMessage && soupTotal > 225 && tryMakeBuilding(5, RobotType.REFINERY)){
             System.out.println("MAKE A REFINE! AHHH");
             sendRefineryMessage = false;
@@ -94,6 +93,12 @@ public class HQRobot {
         int minerToSendTo = (int) minerRobotIDs.get(1);
         int[] message = walkie.makeMessage(messageType, minerToSendTo, -1, -1);
         boolean sent = walkie.trySendMessage(message, cost);
+        return sent;
+    }
+
+    public boolean shareLocation () throws GameActionException {
+        int[] message = walkie.makeMessage(6, -1, -1, -1);
+        boolean sent = walkie.trySendMessage(message, 5);
         return sent;
     }
 }

@@ -12,10 +12,11 @@ public class MinerRobot {
   static RobotController rc;
   static Direction[] directions;
   static RobotType[] spawnedByMiner;
-  static MapLocation HQMapLoc;
+  static MapLocation HQMapLoc, currentLocation;
   static MapLocation refineryLocation;
   static WalkieTalkie walkie;
   static ArrayList<ArrayList<Integer>> toDo;
+  static Direction dirToHQ;
 
   static boolean vaporatorIsMade;
 
@@ -27,6 +28,8 @@ public class MinerRobot {
     spawnedByMiner = helper.spawnedByMiner;
     walkie = new WalkieTalkie(helper);
     toDo = new ArrayList<ArrayList<Integer>>();
+    currentLocation = rc.getLocation();
+    dirToHQ = Direction.NORTH;
   }
 
   public void runMiner() throws GameActionException {
@@ -36,10 +39,7 @@ public class MinerRobot {
     tryRefineAlways();
 
     if (rc.getSoupCarrying()==RobotType.MINER.soupLimit) {
-        if (refineryLocation != null)
-            goToRefinery();
-        else
-            helper.tryMove(helper.randomDirection());
+        goToRefinery();
     } else {
         for (Direction dir : directions)
             if (helper.tryMine(dir))
@@ -51,6 +51,9 @@ public class MinerRobot {
   public void searchForTasks() throws GameActionException {
     // Read new messages for tasks. If it isnt completed, move task to toDo.
     ArrayList<ArrayList<Integer>> newMessages = walkie.readBlockchain();
+    System.out.print("newMessages: ");
+    System.out.println(newMessages);
+
     for (int i=0; i < newMessages.size(); i++){
         ArrayList<Integer> newTasks = newMessages.get(i);
         int taskType = newTasks.get(0);
@@ -60,6 +63,8 @@ public class MinerRobot {
         doTask(true, taskType, senderLocation);
     }
 
+    System.out.print("toDo: ");
+    System.out.println(toDo);
     // Search toDo for tasks. If it is completed, remove.
     for (int i=0; i < toDo.size(); i++){
         ArrayList<Integer> tasksToDo = toDo.get(i);
@@ -77,18 +82,24 @@ public class MinerRobot {
 
   public boolean doTask(boolean newTask, int taskType, MapLocation senderLoc) throws GameActionException {
     boolean success = false;
-    if (taskType == 0){
-        success = tryMakeBuilding(RobotType.VAPORATOR);
-    } else if (taskType == 2) {
-        success = tryMakeBuilding(RobotType.REFINERY);
-    } else if (taskType == 3) {
+    if ( ((taskType == 0) && tryMakeBuilding(RobotType.VAPORATOR))
+        || ((taskType == 2) && tryMakeBuilding(RobotType.REFINERY))
+        || ((taskType == 4) && tryMakeBuilding(RobotType.DESIGN_SCHOOL))
+        )
+    {
+
+        success = true;
+        System.out.print("success: ");
+        System.out.println(success);
+    }
+    else if (taskType == 3) {
         refineryLocation = senderLoc;
         success = true;
-    } else if (taskType == 4) {
-        success = tryMakeBuilding(RobotType.DESIGN_SCHOOL);
+        System.out.println("The new Map Location is:");
+        System.out.println(refineryLocation);
     }
 
-    if (!success && newTask){
+    if ( (success==false) && newTask){
         ArrayList<Integer> newToDo = new ArrayList<Integer>();
         newToDo.add(taskType);
         newToDo.add(senderLoc.x);
@@ -97,12 +108,13 @@ public class MinerRobot {
     }
 
     return success;
+
   }
 
   public void findHQInit() throws GameActionException {
     RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
     for (RobotInfo robot : nearbyRobots)
-        if (robot.type == RobotType.HQ) {
+        if (robot.type.equals(RobotType.HQ)) {
             HQMapLoc = robot.location;
             refineryLocation = robot.location;
             System.out.println("I've found HQ!");
@@ -119,24 +131,28 @@ public class MinerRobot {
   }
 
   public void goToRefinery() throws GameActionException {
-    MapLocation currentLocation = rc.getLocation();
-    Direction dirToHQ = currentLocation.directionTo(refineryLocation);
     System.out.println("GOING BACKKK!!");
-    while (helper.tryMove(dirToHQ)) {
-        currentLocation = rc.getLocation();
-        dirToHQ = currentLocation.directionTo(refineryLocation);
-        break;
+    updatePosition();
+    if (helper.tryMove(dirToHQ) == false) {
+        if (helper.tryRefine(dirToHQ)==false){
+          helper.tryMove(helper.randomDirection());
+      }
     }
-    helper.tryRefine(dirToHQ);
   }
 
   public boolean tryMakeBuilding(RobotType robotTypeToBuild) throws GameActionException{
-    for (Direction dir : directions)
+    for (Direction dir : directions){
         if (helper.tryBuild(robotTypeToBuild, dir)){
-            System.out.println("MADE VAPORATOR");
+            System.out.println("MADE BUILDING");
             return true;
         }
+    }
     return false;
+  }
+
+  public void updatePosition() throws GameActionException {
+    currentLocation = rc.getLocation();
+    dirToHQ = currentLocation.directionTo(HQMapLoc);
   }
 
 }
