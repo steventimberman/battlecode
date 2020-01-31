@@ -17,6 +17,8 @@ public class MinerRobot {
   static WalkieTalkie walkie;
   static ArrayList<ArrayList<Integer>> toDo;
   static Direction dirToHQ;
+  static Direction dirToRefinery;
+  static boolean awayFromHQ;
 
   static boolean vaporatorIsMade;
 
@@ -30,6 +32,8 @@ public class MinerRobot {
     toDo = new ArrayList<ArrayList<Integer>>();
     currentLocation = rc.getLocation();
     dirToHQ = Direction.NORTH;
+    dirToRefinery = Direction.NORTH;
+    awayFromHQ = false;
   }
 
   public void runMiner() throws GameActionException {
@@ -44,7 +48,12 @@ public class MinerRobot {
         for (Direction dir : directions)
             if (helper.tryMine(dir))
                 System.out.println("I mined!");
-        helper.tryMove(helper.randomDirection());
+        updatePosition();
+        if (awayFromHQ)
+          helper.tryMove(helper.randomDirectionExcept(dirToHQ));
+        else
+          helper.tryMove(helper.randomDirection());
+
     }
   }
 
@@ -94,6 +103,7 @@ public class MinerRobot {
     }
     else if (taskType == 3) {
         refineryLocation = senderLoc;
+        awayFromHQ = true;
         success = true;
         System.out.println("The new Map Location is:");
         System.out.println(refineryLocation);
@@ -124,18 +134,18 @@ public class MinerRobot {
 
 
   public void tryRefineAlways() throws GameActionException {
-    MapLocation currentLocation = rc.getLocation();
-    Direction dirToHQ = currentLocation.directionTo(refineryLocation);
-    if (helper.tryRefine(dirToHQ))
+    updatePosition();
+    if (helper.tryRefine(dirToRefinery))
         System.out.println("I refined soup! " + rc.getTeamSoup());
   }
 
   public void goToRefinery() throws GameActionException {
     System.out.println("GOING BACKKK!!");
     updatePosition();
-    if (helper.tryMove(dirToHQ) == false) {
-        if (helper.tryRefine(dirToHQ)==false){
-          helper.tryMove(helper.randomDirection());
+    if (helper.tryMove(dirToRefinery) == false) {
+        if (helper.tryRefine(dirToRefinery)==false){
+          if (awayFromHQ)
+            helper.tryMove(helper.randomDirectionExcept(dirToHQ));
       }
     }
   }
@@ -153,6 +163,7 @@ public class MinerRobot {
   public void updatePosition() throws GameActionException {
     currentLocation = rc.getLocation();
     dirToHQ = currentLocation.directionTo(HQMapLoc);
+    dirToRefinery = currentLocation.directionTo(refineryLocation);
   }
 
 }
