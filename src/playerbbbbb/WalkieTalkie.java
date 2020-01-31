@@ -92,6 +92,24 @@ public class WalkieTalkie {
     } return false;
   }
 
+  public static ArrayList<ArrayList<Integer>> findMessages(int startTurn, int endTurn) throws GameActionException {
+    ArrayList<ArrayList<Integer>> allMessages = new ArrayList<ArrayList<Integer>>();
+    for (int i = startTurn; i <= endTurn; i++) {
+      Transaction[] currentBlock = rc.getBlock(i);
+      for (Transaction trans : currentBlock){
+        int[] message = trans.getMessage();
+        if (message[0] == teamSecretKey){
+          ArrayList<Integer> newMessage = new ArrayList<Integer>();
+          for (int messagePart : message){
+            newMessage.add(messagePart);
+          }
+          allMessages.add(newMessage);
+        }
+      }
+    }
+    return allMessages;
+  }
+
 
 }
 
