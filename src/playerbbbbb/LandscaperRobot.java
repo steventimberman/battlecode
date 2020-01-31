@@ -17,7 +17,7 @@ public class LandscaperRobot {
   static Direction dirToHQ;
   static ArrayList<MapLocation> nearHQ;
   static int nextTile;
-
+  static boolean justDug;
 
   public LandscaperRobot(Helpers help) throws GameActionException {
     helper = help;
@@ -29,37 +29,32 @@ public class LandscaperRobot {
     nextTile = 0;
     currentLocation = rc.getLocation();
     dirToHQ = Direction.NORTH;
+    justDug = false;
   }
 
   public void runLandscaper() throws GameActionException {
     updatePosition();
-    if (rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit){
-      returnDirt();
-    } else {
-      if ((Math.random()*10) >= 5)
-        helper.tryDig(helper.randomDirectionExcept(dirToHQ));
-      else
-        helper.tryMove(helper.randomDirectionExcept(dirToHQ));
-    }
+
+    returnDirt();
 
   }
 
   public void returnDirt() throws GameActionException {
     System.out.println("Returning Dirt!");
-    while (rc.getDirtCarrying() > 0){
-      System.out.println("Lots of it! Dirt!");
-      if (currentLocation.equals(getNextLocation())){
-        System.out.println("BAHH");
-        putDirtDown();
-      } else {
-        System.out.println("BLAHH!");
-        getToHQ();
-      }
+
+    System.out.println("Lots of it! Dirt!");
+    if (currentLocation.equals(getNextLocation())){
+      System.out.println("BAHH");
+      putDirtDown();
+    } else {
+      System.out.println("BLAHH!");
+      getToHQ();
     }
+
   }
 
   public void getToHQ() throws GameActionException {
-    if (helper.tryMove(dirToHQ)==false) {
+    if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocation())==false)) {
       helper.tryMove(helper.randomDirection());
     }
     updatePosition();
@@ -67,14 +62,30 @@ public class LandscaperRobot {
 
   public void putDirtDown() throws GameActionException {
     updatePosition();
-    if ( (currentLocation.y+2 == hqMapLoc.y) && (helper.tryDepositDirt(Direction.NORTH))
-        || (currentLocation.y-2 == hqMapLoc.y) && (helper.tryDepositDirt(Direction.SOUTH))
-        || (currentLocation.x+2 == hqMapLoc.x) && (helper.tryDepositDirt(Direction.EAST))
-        || (currentLocation.x-2 == hqMapLoc.x) && (helper.tryDepositDirt(Direction.WEST))
-        )
-      {
-        nextTile ++;
+    if (justDug) {
+      if ( (currentLocation.y+2 == hqMapLoc.y) &&  (helper.tryDepositDirt(Direction.NORTH))
+          || (currentLocation.y-2 == hqMapLoc.y) && (helper.tryDepositDirt(Direction.SOUTH))
+          || (currentLocation.x+2 == hqMapLoc.x) && (helper.tryDepositDirt(Direction.EAST))
+          || (currentLocation.x-2 == hqMapLoc.x) && (helper.tryDepositDirt(Direction.WEST))
+          )
+        {
+          nextTile ++;
+          justDug = (justDug==false);
+        }
       }
+
+      else {
+            if ((currentLocation.y+2 == hqMapLoc.y) && helper.tryDig(Direction.SOUTH)
+              || (currentLocation.y-2 == hqMapLoc.y) && helper.tryDig(Direction.NORTH)
+              || (currentLocation.x+2 == hqMapLoc.x) && helper.tryDig(Direction.WEST)
+              || (currentLocation.x-2 == hqMapLoc.x) && helper.tryDig(Direction.EAST)
+              )
+            {
+              justDug = (justDug==false);
+            }
+
+      }
+
   }
 
   public void findHQLocation() throws GameActionException {
@@ -91,6 +102,11 @@ public class LandscaperRobot {
 
   public MapLocation getNextLocation() throws GameActionException {
     int currentNextTile = nextTile % 16;
+    return nearHQ.get(currentNextTile);
+  }
+
+  public MapLocation getLastLocation() throws GameActionException {
+    int currentNextTile = (nextTile+15) % 16;
     return nearHQ.get(currentNextTile);
   }
 

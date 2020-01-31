@@ -15,7 +15,7 @@ public class DesignSchoolRobot {
     static MapLocation HQMapLoc;
     static ArrayList<Integer> minerRobotIDs = new ArrayList<Integer>();
     static WalkieTalkie walkie;
-    static boolean makeLandscaper;
+    static int numLandscapers;
 
 
     public DesignSchoolRobot(Helpers help) throws GameActionException {
@@ -23,14 +23,15 @@ public class DesignSchoolRobot {
         rc = helper.rc;
         directions = helper.directions;
         walkie = new WalkieTalkie(helper);
-        makeLandscaper = true;
+        numLandscapers = 0;
     }
 
     public void runDesignSchool() throws GameActionException {
-        if (makeLandscaper){
+        int soupTotal = rc.getTeamSoup();
+        if ((soupTotal > 155) && (numLandscapers < 4)){
             for (Direction dir : directions){
                 if (helper.tryBuild(RobotType.LANDSCAPER, dir)){
-                    makeLandscaper = false;
+                    numLandscapers++;
                 }
             }
         }
