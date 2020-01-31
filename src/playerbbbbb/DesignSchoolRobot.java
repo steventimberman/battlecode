@@ -28,7 +28,7 @@ public class DesignSchoolRobot {
 
     public void runDesignSchool() throws GameActionException {
         int soupTotal = rc.getTeamSoup();
-        if ((soupTotal > 155) && (numLandscapers < 4)){
+        if ((soupTotal > 155) && (numLandscapers < 3)){
             for (Direction dir : directions){
                 if (helper.tryBuild(RobotType.LANDSCAPER, dir)){
                     numLandscapers++;

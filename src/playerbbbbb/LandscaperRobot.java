@@ -16,6 +16,8 @@ public class LandscaperRobot {
   static WalkieTalkie walkie;
   static Direction dirToHQ;
   static ArrayList<MapLocation> nearHQ;
+  static ArrayList<MapLocation> fourSides;
+  static ArrayList<MapLocation> smallSquare;
   static int nextTile;
   static boolean justDug;
 
@@ -26,6 +28,7 @@ public class LandscaperRobot {
     spawnedByMiner = helper.spawnedByMiner;
     walkie = new WalkieTalkie(helper);
     nearHQ = new ArrayList<MapLocation>();
+    smallSquare = new ArrayList<MapLocation>();
     nextTile = 0;
     currentLocation = rc.getLocation();
     dirToHQ = Direction.NORTH;
@@ -33,7 +36,7 @@ public class LandscaperRobot {
   }
 
   public void runLandscaper() throws GameActionException {
-    updatePosition();
+    updateSquarePosition();
 
     returnDirt();
 
@@ -43,21 +46,28 @@ public class LandscaperRobot {
     System.out.println("Returning Dirt!");
 
     System.out.println("Lots of it! Dirt!");
-    if (currentLocation.equals(getNextLocation())){
+    if (currentLocation.equals(getNextLocationSquare())){
       System.out.println("BAHH");
-      putDirtDown();
+      putDirtDownSmallSquare();
     } else {
       System.out.println("BLAHH!");
-      getToHQ();
+      getToHQSquare();
     }
 
   }
 
   public void getToHQ() throws GameActionException {
-    if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocation())==false)) {
+    if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocationSquare())==false)) {
       helper.tryMove(helper.randomDirection());
     }
     updatePosition();
+  }
+
+  public void getToHQSquare() throws GameActionException {
+    if (helper.tryMove(dirToHQ)==false && (currentLocation.equals(getLastLocationSquare())==false)) {
+      helper.tryMove(helper.randomDirection());
+    }
+    updateSquarePosition();
   }
 
   public void putDirtDown() throws GameActionException {
@@ -81,7 +91,9 @@ public class LandscaperRobot {
               || (currentLocation.x-2 == hqMapLoc.x) && helper.tryDig(Direction.EAST)
               )
             {
-              justDug = (justDug==false);
+              if (rc.isLocationOccupied(getNextLocationSquare())==false){
+                justDug = (justDug==false);
+              }
             }
 
       }
@@ -92,7 +104,7 @@ public class LandscaperRobot {
     ArrayList<Integer> messageWithLocation;
     messageWithLocation = walkie.findMessages(1,2).get(0);
     hqMapLoc = new MapLocation(messageWithLocation.get(5), messageWithLocation.get(6));
-    storeNearHQ();
+    storeNextToHQ();
   }
 
   public void updatePosition() throws GameActionException {
@@ -100,15 +112,31 @@ public class LandscaperRobot {
     dirToHQ = currentLocation.directionTo(nearHQ.get(nextTile%16));
   }
 
+  public void updateSquarePosition() throws GameActionException {
+    currentLocation = rc.getLocation();
+    dirToHQ = currentLocation.directionTo(smallSquare.get(nextTile%8));
+  }
+
   public MapLocation getNextLocation() throws GameActionException {
     int currentNextTile = nextTile % 16;
     return nearHQ.get(currentNextTile);
+  }
+
+  public MapLocation getNextLocationSquare() throws GameActionException {
+    int currentNextTile = nextTile % 8;
+    return smallSquare.get(currentNextTile);
   }
 
   public MapLocation getLastLocation() throws GameActionException {
     int currentNextTile = (nextTile+15) % 16;
     return nearHQ.get(currentNextTile);
   }
+
+  public MapLocation getLastLocationSquare() throws GameActionException {
+    int currentNextTile = (nextTile+7) % 8;
+    return smallSquare.get(currentNextTile);
+  }
+
 
   public void storeNearHQ() throws GameActionException {
     MapLocation nextToStore;
@@ -124,11 +152,63 @@ public class LandscaperRobot {
           nextToStore = awayFromHQ(-2,i);
 
         nearHQ.add(nextToStore);
-        if (i==0)
+        if (i==0){
           nearHQ.add(nextToStore);
+          fourSides.add(nextToStore);
+        }
+      }
+    }
+
+  }
+  public void storeNextToHQ() throws GameActionException {
+    MapLocation nextToStore;
+    for (int side = 0; side <= 3; side++){
+      for (int i = -1; i <= 0; i++) {
+        if (side == 0)
+          nextToStore = awayFromHQ(i, 1);
+        else if (side == 1)
+          nextToStore = awayFromHQ(1,-i);
+        else if (side == 2)
+          nextToStore = awayFromHQ(-i,-1);
+        else
+          nextToStore = awayFromHQ(-1,i);
+
+        smallSquare.add(nextToStore);
       }
     }
   }
+
+   public void putDirtDownSmallSquare() throws GameActionException {
+    updateSquarePosition();
+    if (justDug) {
+      if ( (currentLocation.equals(awayFromHQ(0,1))) &&  (helper.tryDepositDirt(Direction.WEST))
+          || (currentLocation.equals(awayFromHQ(1,1))) &&  (helper.tryDepositDirt(Direction.WEST))
+          || (currentLocation.equals(awayFromHQ(1,0))) &&  (helper.tryDepositDirt(Direction.NORTH))
+          || (currentLocation.equals(awayFromHQ(1,-1))) &&  (helper.tryDepositDirt(Direction.NORTH))
+          || (currentLocation.equals(awayFromHQ(0,-1))) &&  (helper.tryDepositDirt(Direction.EAST))
+          || (currentLocation.equals(awayFromHQ(-1,-1))) &&  (helper.tryDepositDirt(Direction.EAST))
+          || (currentLocation.equals(awayFromHQ(-1,0))) &&  (helper.tryDepositDirt(Direction.SOUTH))
+          || (currentLocation.equals(awayFromHQ(-1,1))) &&  (helper.tryDepositDirt(Direction.SOUTH))
+                   )
+        {
+          nextTile ++;
+          justDug = (justDug==false);
+        }
+      }
+
+      else {
+            Direction actualDirToHQ = currentLocation.directionTo(hqMapLoc);
+            MapLocation whereToDig = currentLocation.subtract(actualDirToHQ);
+            if (helper.tryDig(currentLocation.directionTo(whereToDig)))
+            {
+              justDug = (justDug==false);
+            }
+
+      }
+
+  }
+
+
 
   public MapLocation awayFromHQ(int dx, int dy) throws GameActionException {
     MapLocation loc = new MapLocation(hqMapLoc.x + dx, hqMapLoc.y+dy);
