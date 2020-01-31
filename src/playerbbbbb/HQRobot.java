@@ -25,8 +25,8 @@ public class HQRobot {
         directions = helper.directions;
         spawnedByMiner = helper.spawnedByMiner;
         walkie = new WalkieTalkie(helper);
-        sendVaporatorMessage = true;
-        sendRefineryMessage = false;
+        sendVaporatorMessage = false;
+        sendRefineryMessage = true;
         sendDesignSchoolMessage = false;
         makeLandscaperNext = false;
 

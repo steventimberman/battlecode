@@ -41,21 +41,27 @@ public class MinerRobot {
   public void runMiner() throws GameActionException {
 
     searchForTasks();
+    if (builder == false){
+      tryRefineAlways();
 
-    tryRefineAlways();
-
-    if (rc.getSoupCarrying()==RobotType.MINER.soupLimit) {
-        goToRefinery();
-    } else {
-        for (Direction dir : directions)
-            if (helper.tryMine(dir))
-                System.out.println("I mined!");
-        updatePosition();
-        if (awayFromHQ)
-          helper.tryMove(helper.randomDirectionExcept(dirToHQ));
-        else
-          helper.tryMove(helper.randomDirection());
-
+      if (rc.getSoupCarrying()==RobotType.MINER.soupLimit) {
+          goToRefinery();
+      } else {
+          MapLocation[] soupClose = rc.senseNearbySoup(2);
+          for (MapLocation hasSoup : soupClose){
+              Direction dir = currentLocation.directionTo(hasSoup);
+              if (helper.tryMine(dir)){
+                  System.out.println("I mined!");
+                }
+          }
+          updatePosition();
+          if (awayFromHQ)
+            helper.tryMove(helper.randomDirectionExcept(dirToHQ));
+          else
+            helper.tryMove(helper.randomDirection());
+      }
+    } else{
+      helper.tryMove(helper.randomDirectionExcept(dirToHQ));
     }
   }
 
@@ -112,6 +118,7 @@ public class MinerRobot {
     }
     else if (taskType == 7) {
         awayFromHQ = true;
+        builder = true;
         success = true;
         System.out.println("The new Map Location is:");
         System.out.println(refineryLocation);
